@@ -3,6 +3,7 @@ from datetime import datetime
 from urllib.parse import urlparse
 from threading import Thread
 from queue import Queue, Empty
+import urllib3
 import requests
 import logging
 
@@ -45,8 +46,12 @@ class GitLabEnum:
         self._threads_count = threads_count
         self._max_nf_count = max_nf_count
         self._no_check_certificate = no_check_certificate
-
-        self._check_url()
+        if self._no_check_certificate:
+            urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
+        try:
+            self._check_url()
+        except ValueError as e:
+            self._logger.error(e)
         self._proxy_url = proxy_url
         self._nf_count = 0
 
@@ -66,14 +71,18 @@ class GitLabEnum:
             except Empty:
                 self._logger.debug('Thread finished his work')
                 return
-            response = requests.get('{url}/api/v{api_version}/users/{user_id}'.format(
-                url=self._url,
-                api_version=self._api_version,
-                user_id=user_id
-            ), proxies={
-                'http': self._proxy_url,
-                'https': self._proxy_url
-            }, verify=not self._no_check_certificate)
+            try:
+                response = requests.get('{url}/api/v{api_version}/users/{user_id}'.format(
+                    url=self._url,
+                    api_version=self._api_version,
+                    user_id=user_id
+                ), proxies={
+                    'http': self._proxy_url,
+                    'https': self._proxy_url
+                }, verify=not self._no_check_certificate)
+            except urllib3.exceptions.SSLError:
+                self._logger.error('SSL Error occurred, try to use --no-check-certificate option')
+                return
             if response.status_code != 200:
                 self._nf_count += 1
                 continue
