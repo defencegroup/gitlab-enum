@@ -3,7 +3,7 @@ import setuptools
 
 setuptools.setup(
     name='gitlab-enum',
-    version='1.0',
+    version='1.1',
     description='Python GitLab users enumerator',
     packages=setuptools.find_packages(),
     entry_points={

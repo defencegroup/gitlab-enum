@@ -19,6 +19,8 @@ def main():
                              default=5, metavar='5', type=int)
     args_parser.add_argument('-n', '--nf-max', help='Max 404 codes before stop',
                              default=30, metavar='30', type=int)
+    args_parser.add_argument('-k', '--no-check-certificate', help='Ignore SSL mismatch',
+                             action='store_true')
     args_parser.add_argument('-l', '--logging', help='Logging level (DEBUG/INFO/WARNING/ERROR)',
                              default='INFO', metavar='INFO')
     arguments = vars(args_parser.parse_args())
@@ -40,7 +42,8 @@ def main():
             proxy_url=arguments['proxy'],
             api_version=arguments['version'],
             threads_count=arguments['threads'],
-            max_nf_count=arguments['nf_max']
+            max_nf_count=arguments['nf_max'],
+            no_check_certificate=arguments['no_check_certificate']
         )
     except ValueError as e:
         logger.error('Wrong URL!')

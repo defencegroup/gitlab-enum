@@ -38,12 +38,13 @@ class GitLabUser:
 
 
 class GitLabEnum:
-    def __init__(self, url, proxy_url=None, api_version=3, threads_count=5, max_nf_count=30):
+    def __init__(self, url, proxy_url=None, api_version=3, threads_count=5, max_nf_count=30, no_check_certificate=False):
         self._logger = logging.getLogger(__name__)
         self._url = url
         self._api_version = api_version
         self._threads_count = threads_count
         self._max_nf_count = max_nf_count
+        self._no_check_certificate = no_check_certificate
 
         self._check_url()
         self._proxy_url = proxy_url
@@ -72,7 +73,7 @@ class GitLabEnum:
             ), proxies={
                 'http': self._proxy_url,
                 'https': self._proxy_url
-            })
+            }, verify=not self._no_check_certificate)
             if response.status_code != 200:
                 self._nf_count += 1
                 continue
